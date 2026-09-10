@@ -1,5 +1,7 @@
 # 慕尼黑 10月17-18日 行程手册
 
+https://lazyotter0821.github.io/munich_sysu/
+
 > 一份为慕尼黑电车 150 周年周末（2026/10/17-10/18）准备的单页行程手册，覆盖抵达、老城步行、电车巡游、Auer Dult 秋市集、Tram-Betriebshof 车辆段开放日和 Garching 酒店的全流程交通方案。
 
 ## 项目特点
