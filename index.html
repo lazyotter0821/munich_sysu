@@ -10,7 +10,7 @@
   * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
   html { -webkit-text-size-adjust: 100%; }
   body {
-    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
     margin: 0;
     background: #f5f6f8;
     color: #1f2a44;
@@ -46,7 +46,7 @@
     flex-wrap: wrap;
   }
   .clock b { letter-spacing: .3px; font-size: 12px; font-weight: 600; }
-  .clock .time { font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 14px; }
+  .clock .time { font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; font-size: 14px; }
   .clock .date { opacity: .85; font-size: 11px; }
   .container { max-width: 600px; margin: 0 auto; padding: 0 12px 50px; }
 
@@ -61,9 +61,38 @@
     background: linear-gradient(135deg, #d52b1e 0%, #f5a623 100%);
     color: #fff;
     padding: 13px 16px;
+    cursor: pointer;
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
   }
-  .day-header h2 { margin: 0; font-size: 16px; line-height: 1.4; }
-  .day-header .summary { font-size: 12px; opacity: .95; margin-top: 4px; line-height: 1.5; }
+  .day-header:hover { filter: brightness(1.05); }
+  .day-header:active { filter: brightness(.95); }
+  .day-header h2 { margin: 0 32px 0 0; font-size: 16px; line-height: 1.4; }
+  .day-header .summary { font-size: 12px; opacity: .95; margin-top: 4px; line-height: 1.5; padding-right: 32px; }
+  .day-toggle {
+    position: absolute;
+    top: 50%;
+    right: 16px;
+    transform: translateY(-50%);
+    width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    background: rgba(255,255,255,.25);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 16px;
+    line-height: 1;
+    pointer-events: none;
+    transition: transform .25s ease;
+  }
+  .day-section.collapsed .day-toggle { transform: translateY(-50%) rotate(-90deg); }
+  .day-section.collapsed .event { display: none; }
+  .day-toggle::before {
+    content: "▾";
+  }
   .event {
     padding: 14px 16px;
     border-bottom: 1px solid #eef0f4;
@@ -80,7 +109,7 @@
     color: #fff;
     padding: 4px 10px;
     border-radius: 5px;
-    font-family: "SF Mono", Menlo, Consolas, monospace;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
     font-size: 12px;
     font-weight: 600;
     margin-bottom: 6px;
@@ -91,13 +120,6 @@
     white-space: nowrap;
     font-size: 12px;
     opacity: .9;
-    font-weight: 500;
-  }
-  .event-time .t-muc small,
-  .event-time .t-gz small {
-    font-size: 9px;
-    opacity: .8;
-    margin-left: 3px;
     font-weight: 500;
   }
   .event-time .t-gz {
@@ -229,8 +251,9 @@
     .container { max-width: 880px; padding: 0 24px 60px; }
     .day-section { margin-bottom: 28px; }
     .day-header { padding: 18px 24px; }
-    .day-header h2 { font-size: 22px; }
-    .day-header .summary { font-size: 14px; }
+    .day-header h2 { font-size: 22px; margin-right: 40px; }
+    .day-header .summary { font-size: 14px; padding-right: 40px; }
+    .day-toggle { right: 24px; width: 30px; height: 30px; font-size: 18px; }
     .event { padding: 20px 24px; }
     .event-time {
       flex-direction: row;
@@ -243,10 +266,6 @@
     .event-time .t-muc,
     .event-time .t-gz {
       font-size: 13px;
-    }
-    .event-time .t-muc small,
-    .event-time .t-gz small {
-      font-size: 10px;
     }
     .event-time .t-gz {
       border-top: none;
@@ -399,7 +418,7 @@
 
 <header>
   <h1>慕尼黑 10月17-18日 行程手册</h1>
-  <div class="subtitle">CX301 抵达 · 电车150周年 · Auer Dult · Tram-Betriebshof · Garching</div>
+  <div class="subtitle">CX301 抵达 · 电车150周年 · Auer Dult（秋季市集） · Tram-Betriebshof（电车车辆段） · Garching（加兴）</div>
   <div class="clocks">
     <div class="clock"><b>广州 GZ (UTC+8)</b><span class="time" id="gz-time">--:--:--</span><span class="date" id="gz-date"></span></div>
     <div class="clock"><b>慕尼黑 MUC (UTC+2 夏令时)</b><span class="time" id="muc-time">--:--:--</span><span class="date" id="muc-date"></span></div>
@@ -410,16 +429,17 @@
 
   <!-- 10月17日 -->
   <section class="day-section">
-    <div class="day-header">
-      <h2>10月17日（周六）｜抵达 + 老城 + 电车150周年 + Auer Dult</h2>
-      <div class="summary">机场 → Garching 酒店寄存 → 老城步行 → 150周年 Tram-Parade → Auer Dult → 回 Garching 酒店</div>
+    <div class="day-header" role="button" tabindex="0" aria-expanded="true">
+      <h2>10月17日（周六）｜抵达 + 老城 + 电车150周年 + Auer Dult（秋季市集）</h2>
+      <div class="summary">机场 → Garching（加兴）酒店寄存 → 老城步行 → 150周年 Tram-Parade（电车巡游） → Auer Dult（秋季市集） → 回 Garching（加兴）酒店</div>
+      <span class="day-toggle" aria-hidden="true"></span>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">08:05 <small>MUC</small></span>
-          <span class="t-gz">14:05 <small></small>GZ</small></span>
+          <span class="t-muc">08:05 MUC</span>
+          <span class="t-gz">14:05 GZ</span>
         </span>
         <span class="event-title">CX301 抵达慕尼黑机场</span>
       </div>
@@ -433,111 +453,111 @@
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">约09:15 <small>MUC</small></span>
-          <span class="t-gz">约15:15 <small>GZ</small></span>
+          <span class="t-muc">约09:15 MUC</span>
+          <span class="t-gz">约15:15 GZ</span>
         </span>
-        <span class="event-title">机场 → Garching 酒店</span>
+        <span class="event-title">机场 → Garching（加兴）酒店</span>
       </div>
       <div class="event-meta">
-        <span>起点：<b>Flughafen München</b></span>
-        <span>终点：<b>Courtyard by Marriott Munich Garching</b> (Walther-von-Dyck-Str. 12, 85748 Garching)</span>
+        <span>起点：<b>Flughafen München（慕尼黑机场）</b></span>
+        <span>终点：<b>Courtyard by Marriott Munich Garching（慕尼黑加兴万怡酒店）</b> (Walther-von-Dyck-Str. 12（瓦尔特·冯·戴克街12号）, 85748 Garching（加兴）)</span>
         <span>预计耗时：约 55-70 分钟</span>
       </div>
       <div class="route-detail">
         <h4>详细乘车路线（推荐方案：S1 → U6）</h4>
         <ol>
-          <li>机场航站楼底层步行至 <b>Flughafen München</b> S-Bahn 站（Terminal 内通道直达）。</li>
-          <li>乘坐 <span class="line-tag line-s">S1</span>（方向 Herrsching / Ostbahnhof，看实时班次）至 <b>München Hbf（中央火车站）</b>。约 40-45 分钟。</li>
-          <li>中央火车站内换乘：步行至 U-Bahn 平台，乘 <span class="line-tag line-u6">U6</span>（方向 Garching-Forschungszentrum）至 <b>Garching-Forschungszentrum</b>。约 25-30 分钟。</li>
-          <li>下车后 <span class="line-tag line-walk">步行</span>约 5-8 分钟（约 500 米）至酒店：出站沿 Lichtenbergstraße 西行，左转进 Walther-von-Dyck-Straße 即到。</li>
+          <li>机场航站楼底层步行至 <b>Flughafen München（慕尼黑机场）</b> S-Bahn（城郊快铁）站（Terminal（航站楼）内通道直达）。</li>
+          <li>乘坐 <span class="line-tag line-s">S1</span>（方向 Herrsching（赫尔兴） / Ostbahnhof（东火车站），看实时班次）至 <b>München Hbf（慕尼黑中央火车站）</b>。约 40-45 分钟。</li>
+          <li>中央火车站内换乘：步行至 U-Bahn（地铁）平台，乘 <span class="line-tag line-u6">U6</span>（方向 Garching-Forschungszentrum（加兴研究中心））至 <b>Garching-Forschungszentrum（加兴研究中心）</b>。约 25-30 分钟。</li>
+          <li>下车后 <span class="line-tag line-walk">步行</span>约 5-8 分钟（约 500 米）至酒店：出站沿 Lichtenbergstraße（利希滕贝格街）西行，左转进 Walther-von-Dyck-Straße（瓦尔特·冯·戴克街）即到。</li>
         </ol>
-        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：S1 至 <b>Neufahrn</b> 换乘 Bus 293 直达 Garching（适合行李少时，但班次稀疏，出发前查 MVV App）。</p>
+        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：S1 至 <b>Neufahrn（诺伊法恩）</b> 换乘 Bus 293（公交293路）直达 Garching（加兴）（适合行李少时，但班次稀疏，出发前查 MVV App（慕尼黑交通联盟App））。</p>
       </div>
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Flughafen%20M%C3%BCnchen&daddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012%2C%2085748%20Garching&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Flughafen%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012%2C%2085748%20Garching&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
-      <div class="tips">先在酒店寄存行李（10:30 前抵达，通常可寄存或申请 early check-in）。当天不要带大行李去老城。</div>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Flughafen%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012%2C%2085748%20Garching&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <div class="tips">先在酒店寄存行李（10:30 前抵达，通常可寄存或申请 early check-in（提前办理入住））。当天不要带大行李去老城。</div>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">约11:00 <small>MUC</small></span>
-          <span class="t-gz">约17:00 <small>GZ</small></span>
+          <span class="t-muc">约11:00 MUC</span>
+          <span class="t-gz">约17:00 GZ</span>
         </span>
         <span class="event-title">酒店 → 慕尼黑老城步行</span>
       </div>
       <div class="event-meta">
-        <span>路线：<b>Garching-Forschungszentrum → Marienplatz → Karlsplatz → Frauenkirche → Marienplatz</b></span>
+        <span>路线：<b>Garching-Forschungszentrum（加兴研究中心） → Marienplatz（玛利亚广场） → Karlsplatz（卡尔广场） → Frauenkirche（圣母教堂） → Marienplatz（玛利亚广场）</b></span>
         <span>预计耗时：老城步行约 1.5-2 小时</span>
       </div>
       <div class="route-detail">
-        <h4>详细乘车路线（U6 → Marienplatz）</h4>
+        <h4>详细乘车路线（U6 → Marienplatz（玛利亚广场））</h4>
         <ol>
-          <li><span class="line-tag line-walk">步行</span>从酒店到 <b>Garching-Forschungszentrum</b> U-Bahn 站（约 5-8 分钟）。</li>
-          <li>乘 <span class="line-tag line-u6">U6</span>（方向 Klinikum Großhadern）至 <b>Marienplatz</b>。约 25-30 分钟，途经 9 站。</li>
-          <li>出站即是 <b>Marienplatz</b>，沿 Kaufinger Straße 向西北步行至 <b>Karlsplatz (Stachus)</b>（约 10 分钟）。</li>
-          <li>原路向东折返，途经 <b>Frauenkirche</b>（可入内参观），回到 Marienplatz。</li>
+          <li><span class="line-tag line-walk">步行</span>从酒店到 <b>Garching-Forschungszentrum（加兴研究中心）</b> U-Bahn（地铁）站（约 5-8 分钟）。</li>
+          <li>乘 <span class="line-tag line-u6">U6</span>（方向 Klinikum Großhadern（格罗伊德恩医院））至 <b>Marienplatz（玛利亚广场）</b>。约 25-30 分钟，途经 9 站。</li>
+          <li>出站即是 <b>Marienplatz（玛利亚广场）</b>，沿 Kaufinger Straße（考芬格街）向西北步行至 <b>Karlsplatz (Stachus)（卡尔广场，又称施塔胡斯）</b>（约 10 分钟）。</li>
+          <li>原路向东折返，途经 <b>Frauenkirche（圣母教堂）</b>（可入内参观），回到 Marienplatz（玛利亚广场）。</li>
         </ol>
       </div>
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&daddr=Marienplatz%2C%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&destination=Marienplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&destination=Marienplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">下午 <small>MUC</small></span>
-          <span class="t-gz">晚上 <small>GZ</small></span>
+          <span class="t-muc">下午 MUC</span>
+          <span class="t-gz">晚上 GZ</span>
         </span>
         <span class="event-title">150周年 Tram-Parade（电车巡游）</span>
       </div>
       <div class="event-meta">
         <span>地点：<b>慕尼黑老城市中心</b>，并计划有 Jubiläumslinie（纪念线路）</span>
       </div>
-      <div class="tips">最终具体时间 / 路线应临近出发核对 MVG 官方公告；巡游路线通常经过 Marienplatz / Sendlinger Tor / Maxmonument 一带。</div>
+      <div class="tips">最终具体时间 / 路线应临近出发核对 MVG（慕尼黑交通公司）官方公告；巡游路线通常经过 Marienplatz（玛利亚广场） / Sendlinger Tor（森德林门） / Maxmonument（马克斯纪念塔）一带。</div>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">约16:00 <small>MUC</small></span>
-          <span class="t-gz">约22:00 <small>GZ</small></span>
+          <span class="t-muc">约16:00 MUC</span>
+          <span class="t-gz">约22:00 GZ</span>
         </span>
         <span class="event-title">前往 Auer Dult（秋季市集）</span>
       </div>
       <div class="event-meta">
-        <span>起点：<b>Marienplatz</b></span>
-        <span>终点：<b>Mariahilfplatz</b></span>
+        <span>起点：<b>Marienplatz（玛利亚广场）</b></span>
+        <span>终点：<b>Mariahilfplatz（圣母助佑广场）</b></span>
         <span>预计耗时：约 10-20 分钟</span>
       </div>
       <div class="route-detail">
-        <h4>详细乘车路线（Tram 18）</h4>
+        <h4>详细乘车路线（Tram 18（18路电车））</h4>
         <ol>
-          <li>在 <b>Marienplatz</b> 附近的 <b>Rosenheimer Platz</b> 或 <b>Sendlinger Tor</b> 上车，乘 <span class="line-tag line-tram">Tram 18</span>（方向 Giesing Bahnhof）至 <b>Mariahilfplatz</b>。约 8 分钟。</li>
+          <li>在 <b>Marienplatz（玛利亚广场）</b> 附近的 <b>Rosenheimer Platz（罗森海姆广场）</b> 或 <b>Sendlinger Tor（森德林门）</b> 上车，乘 <span class="line-tag line-tram">Tram 18（18路电车）</span>（方向 Giesing Bahnhof（吉辛火车站））至 <b>Mariahilfplatz（圣母助佑广场）</b>。约 8 分钟。</li>
           <li>出站即市集广场入口。</li>
         </ol>
-        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：<span class="line-tag line-bus">Bus 52</span> 也可直达 Mariahilfplatz；如庆典影响线路，以 MVV 实时导航为准。</p>
+        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：<span class="line-tag line-bus">Bus 52（52路公交）</span> 也可直达 Mariahilfplatz（圣母助佑广场）；如庆典影响线路，以 MVV（慕尼黑交通联盟）实时导航为准。</p>
       </div>
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Marienplatz%2C%20M%C3%BCnchen&daddr=Mariahilfplatz%2C%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Marienplatz%2C%20M%C3%BCnchen&destination=Mariahilfplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Marienplatz%2C%20M%C3%BCnchen&destination=Mariahilfplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">16:15-18:30 <small>MUC</small></span>
-          <span class="t-gz">22:15-00:30+1 <small>GZ</small></span>
+          <span class="t-muc">16:15-18:30 MUC</span>
+          <span class="t-gz">22:15-00:30+1 GZ</span>
         </span>
-        <span class="event-title">Auer Dult 游览</span>
+        <span class="event-title">Auer Dult（秋季市集）游览</span>
       </div>
       <div class="event-meta">
-        <span>地点：<b>Mariahilfplatz</b></span>
+        <span>地点：<b>Mariahilfplatz（圣母助佑广场）</b></span>
         <span>预计耗时：约 2 小时</span>
       </div>
       <div class="tips">市场 19:00 结束；游乐设施 10:30-19:00；10月17日日落约 18:21，18:30 离开时基本已经入夜。</div>
@@ -546,21 +566,21 @@
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">19:00 <small>MUC</small></span>
-          <span class="t-gz">01:00+1 <small>GZ</small></span>
+          <span class="t-muc">19:00 MUC</span>
+          <span class="t-gz">01:00+1 GZ</span>
         </span>
-        <span class="event-title">老城晚餐 + 散步，然后回 Garching 酒店</span>
+        <span class="event-title">老城晚餐 + 散步，然后回 Garching（加兴）酒店</span>
       </div>
       <div class="event-meta">
-        <span>起点：<b>Mariahilfplatz</b></span>
-        <span>终点：<b>Courtyard by Marriott Munich Garching</b></span>
+        <span>起点：<b>Mariahilfplatz（圣母助佑广场）</b></span>
+        <span>终点：<b>Courtyard by Marriott Munich Garching（慕尼黑加兴万怡酒店）</b></span>
         <span>预计耗时：约 50-60 分钟</span>
       </div>
       <div class="route-detail">
-        <h4>详细乘车路线（Tram 18 → U6）</h4>
+        <h4>详细乘车路线（Tram 18（18路电车） → U6）</h4>
         <ol>
-          <li>在 <b>Mariahilfplatz</b> 乘 <span class="line-tag line-tram">Tram 18</span>（方向 Schönseestraße / Effnerplatz 或视线路调整，方向至 <b>Sendlinger Tor</b> 也可），约 6-8 分钟。</li>
-          <li>在 <b>Sendlinger Tor</b> 下车，换乘 <span class="line-tag line-u6">U6</span>（方向 Garching-Forschungszentrum）至终点。约 25-30 分钟。</li>
+          <li>在 <b>Mariahilfplatz（圣母助佑广场）</b> 乘 <span class="line-tag line-tram">Tram 18（18路电车）</span>（方向 Schönseestraße（申瑟街） / Effnerplatz（埃夫纳广场）或视线路调整，方向至 <b>Sendlinger Tor（森德林门）</b> 也可），约 6-8 分钟。</li>
+          <li>在 <b>Sendlinger Tor（森德林门）</b> 下车，换乘 <span class="line-tag line-u6">U6</span>（方向 Garching-Forschungszentrum（加兴研究中心））至终点。约 25-30 分钟。</li>
           <li><span class="line-tag line-walk">步行</span> 5-8 分钟回酒店。</li>
         </ol>
         <p style="margin:8px 0 0;font-size:12px;color:#666;">提示：第一天夜航抵达，建议 21:00-21:30 (MUC) / 03:00-03:30 (GZ) 收工回酒店。U6 末班车通常 1:00 左右，但建议早点回。</p>
@@ -568,57 +588,58 @@
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Mariahilfplatz%2C%20M%C3%BCnchen&daddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Mariahilfplatz%2C%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Mariahilfplatz%2C%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
     </div>
   </section>
 
   <!-- 10月18日 -->
   <section class="day-section">
-    <div class="day-header">
-      <h2>10月18日（周日）｜Tram-Betriebshof 开放日 + 下午自由活动</h2>
-      <div class="summary">Garching 酒店 → Tram-Betriebshof 开放日 → 市中心自由活动 → 回 Garching 酒店</div>
+    <div class="day-header" role="button" tabindex="0" aria-expanded="true">
+      <h2>10月18日（周日）｜Tram-Betriebshof（电车车辆段）开放日 + 下午自由活动</h2>
+      <div class="summary">Garching（加兴）酒店 → Tram-Betriebshof（电车车辆段）开放日 → 市中心自由活动 → 回 Garching（加兴）酒店</div>
+      <span class="day-toggle" aria-hidden="true"></span>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">早餐后约09:30 <small>MUC</small></span>
-          <span class="t-gz">约15:30 <small>GZ</small></span>
+          <span class="t-muc">早餐后约09:30 MUC</span>
+          <span class="t-gz">约15:30 GZ</span>
         </span>
-        <span class="event-title">酒店 → Tram-Betriebshof 开放日</span>
+        <span class="event-title">酒店 → Tram-Betriebshof（电车车辆段）开放日</span>
       </div>
       <div class="event-meta">
-        <span>起点：<b>Courtyard by Marriott Munich Garching</b></span>
-        <span>终点：<b>Tram-Betriebshof, Einsteinstraße 148, 81677 München</b></span>
+        <span>起点：<b>Courtyard by Marriott Munich Garching（慕尼黑加兴万怡酒店）</b></span>
+        <span>终点：<b>Tram-Betriebshof（电车车辆段）, Einsteinstraße 148（爱因斯坦街148号）, 81677 München（慕尼黑）</b></span>
         <span>预计耗时：约 50-60 分钟</span>
       </div>
       <div class="route-detail">
         <h4>详细乘车路线（U6 → U4/U5 → 步行）</h4>
         <ol>
-          <li><span class="line-tag line-walk">步行</span>至 <b>Garching-Forschungszentrum</b> U-Bahn 站（约 5-8 分钟）。</li>
-          <li>乘 <span class="line-tag line-u6">U6</span>（方向 Klinikum Großhadern）至 <b>Odeonsplatz</b>。约 22-25 分钟。</li>
-          <li>Odeonsplatz 站内换乘 <span class="line-tag line-u4">U4</span>（或 <span class="line-tag line-u5">U5</span>，方向 Arabellapark）至 <b>Max-Weber-Platz</b>。约 5 分钟。</li>
-          <li>出站后 <span class="line-tag line-walk">步行</span>沿 Einsteinstraße 向东约 12-15 分钟（约 900 米）即达 Tram-Betriebshof。</li>
+          <li><span class="line-tag line-walk">步行</span>至 <b>Garching-Forschungszentrum（加兴研究中心）</b> U-Bahn（地铁）站（约 5-8 分钟）。</li>
+          <li>乘 <span class="line-tag line-u6">U6</span>（方向 Klinikum Großhadern（格罗伊德恩医院））至 <b>Odeonsplatz（统帅堂广场）</b>。约 22-25 分钟。</li>
+          <li>Odeonsplatz（统帅堂广场）站内换乘 <span class="line-tag line-u4">U4</span>（或 <span class="line-tag line-u5">U5</span>，方向 Arabellapark（阿拉贝拉公园））至 <b>Max-Weber-Platz（马克斯·韦伯广场）</b>。约 5 分钟。</li>
+          <li>出站后 <span class="line-tag line-walk">步行</span>沿 Einsteinstraße（爱因斯坦街）向东约 12-15 分钟（约 900 米）即达 Tram-Betriebshof（电车车辆段）。</li>
         </ol>
-        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：Max-Weber-Platz 出站后乘 <span class="line-tag line-tram">Tram 19</span>（方向 Berg am Laim Bf.）2 站至 Einsteinstraße，再步行。</p>
+        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：Max-Weber-Platz（马克斯·韦伯广场）出站后乘 <span class="line-tag line-tram">Tram 19（19路电车）</span>（方向 Berg am Laim Bf.（莱姆山火车站））2 站至 Einsteinstraße（爱因斯坦街），再步行。</p>
       </div>
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&daddr=Einsteinstra%C3%9Fe%20148%2C%2081677%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&destination=Einsteinstra%C3%9Fe%20148%2C%2081677%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
-      <div class="tips">开放日专门交通安排尚可能更新，出发前查 MVG 官方公告；入口位置以现场指示为准。</div>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&destination=Einsteinstra%C3%9Fe%20148%2C%2081677%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <div class="tips">开放日专门交通安排尚可能更新，出发前查 MVG（慕尼黑交通公司）官方公告；入口位置以现场指示为准。</div>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">上午 <small>MUC</small></span>
-          <span class="t-gz">下午 <small>GZ</small></span>
+          <span class="t-muc">上午 MUC</span>
+          <span class="t-gz">下午 GZ</span>
         </span>
-        <span class="event-title">Tag der offenen Tür（车辆段开放日）</span>
+        <span class="event-title">Tag der offenen Tür（开放日，车辆段开放日）</span>
       </div>
       <div class="event-meta">
-        <span>地点：<b>Tram-Betriebshof, Einsteinstraße 148</b></span>
+        <span>地点：<b>Tram-Betriebshof（电车车辆段）, Einsteinstraße 148（爱因斯坦街148号）</b></span>
         <span>活动时长：按官方节目，约 2-3 小时</span>
       </div>
       <div class="tips">可参观维修车间、洗车设施、驾驶培训区域；如遇人多排队优先维修车间。</div>
@@ -627,41 +648,41 @@
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">中午后约13:00 <small>MUC</small></span>
-          <span class="t-gz">约19:00 <small>GZ</small></span>
+          <span class="t-muc">中午后约13:00 MUC</span>
+          <span class="t-gz">约19:00 GZ</span>
         </span>
         <span class="event-title">车辆段 → 市中心自由活动</span>
       </div>
       <div class="event-meta">
-        <span>起点：<b>Einsteinstraße 148</b></span>
-        <span>终点：<b>Odeonsplatz / 老城</b></span>
+        <span>起点：<b>Einsteinstraße 148（爱因斯坦街148号）</b></span>
+        <span>终点：<b>Odeonsplatz（统帅堂广场） / 老城</b></span>
         <span>预计耗时：约 15-25 分钟</span>
       </div>
       <div class="route-detail">
         <h4>详细乘车路线（U4/U5 → U6）</h4>
         <ol>
-          <li><span class="line-tag line-walk">步行</span>至 <b>Max-Weber-Platz</b> U-Bahn 站（约 12-15 分钟）。</li>
-          <li>乘 <span class="line-tag line-u4">U4</span>（或 <span class="line-tag line-u5">U5</span>，方向 Westendstraße / Laimer Platz）至 <b>Odeonsplatz</b>。约 6 分钟。</li>
+          <li><span class="line-tag line-walk">步行</span>至 <b>Max-Weber-Platz（马克斯·韦伯广场）</b> U-Bahn（地铁）站（约 12-15 分钟）。</li>
+          <li>乘 <span class="line-tag line-u4">U4</span>（或 <span class="line-tag line-u5">U5</span>，方向 Westendstraße（西区街） / Laimer Platz（莱姆广场））至 <b>Odeonsplatz（统帅堂广场）</b>。约 6 分钟。</li>
           <li>出站即到老城北端，可前往 <b>Residenz（王宫）</b>、<b>Hofgarten（宫廷花园）</b>、<b>英国花园</b>。</li>
         </ol>
-        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：在 Einsteinstraße 直接乘 <span class="line-tag line-tram">Tram 19</span>（向西方向）至 <b>Theatinerstraße / Odeonsplatz</b> 一带。</p>
+        <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：在 Einsteinstraße（爱因斯坦街）直接乘 <span class="line-tag line-tram">Tram 19（19路电车）</span>（向西方向）至 <b>Theatinerstraße（提亚蒂纳街） / Odeonsplatz（统帅堂广场）</b> 一带。</p>
       </div>
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Einsteinstra%C3%9Fe%20148%2C%20M%C3%BCnchen&daddr=Odeonsplatz%2C%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Einsteinstra%C3%9Fe%20148%2C%20M%C3%BCnchen&destination=Odeonsplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Einsteinstra%C3%9Fe%20148%2C%20M%C3%BCnchen&destination=Odeonsplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
     </div>
 
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">下午 <small>MUC</small></span>
-          <span class="t-gz">晚上 <small>GZ</small></span>
+          <span class="t-muc">下午 MUC</span>
+          <span class="t-gz">晚上 GZ</span>
         </span>
         <span class="event-title">市中心自由活动</span>
       </div>
       <div class="event-meta">
-        <span>推荐：<b>Residenz · Hofgarten · 英国花园 · Marienplatz</b></span>
+        <span>推荐：<b>Residenz（王宫） · Hofgarten（宫廷花园） · 英国花园 · Marienplatz（玛利亚广场）</b></span>
       </div>
       <div class="tips">10月18日日落约 18:19 (MUC)，建议把需要自然光的景点放在 17:30 以前。</div>
     </div>
@@ -669,28 +690,28 @@
     <div class="event">
       <div class="event-head">
         <span class="event-time">
-          <span class="t-muc">约17:00 <small>MUC</small></span>
-          <span class="t-gz">约23:00 <small>GZ</small></span>
+          <span class="t-muc">约17:00 MUC</span>
+          <span class="t-gz">约23:00 GZ</span>
         </span>
-        <span class="event-title">市中心 → 回 Garching 酒店</span>
+        <span class="event-title">市中心 → 回 Garching（加兴）酒店</span>
       </div>
       <div class="event-meta">
-        <span>起点：<b>Marienplatz / Odeonsplatz</b></span>
-        <span>终点：<b>Courtyard by Marriott Munich Garching</b></span>
+        <span>起点：<b>Marienplatz（玛利亚广场） / Odeonsplatz（统帅堂广场）</b></span>
+        <span>终点：<b>Courtyard by Marriott Munich Garching（慕尼黑加兴万怡酒店）</b></span>
         <span>预计耗时：约 35-45 分钟</span>
       </div>
       <div class="route-detail">
         <h4>详细乘车路线（U6）</h4>
         <ol>
-          <li>在 <b>Marienplatz</b> 或 <b>Odeonsplatz</b> 乘 <span class="line-tag line-u6">U6</span>（方向 Garching-Forschungszentrum）至终点。约 25-30 分钟。</li>
+          <li>在 <b>Marienplatz（玛利亚广场）</b> 或 <b>Odeonsplatz（统帅堂广场）</b> 乘 <span class="line-tag line-u6">U6</span>（方向 Garching-Forschungszentrum（加兴研究中心））至终点。约 25-30 分钟。</li>
           <li><span class="line-tag line-walk">步行</span> 5-8 分钟（约 500 米）回酒店。</li>
         </ol>
       </div>
       <div class="map-block">
         <iframe src="https://maps.google.com/maps?saddr=Marienplatz%2C%20M%C3%BCnchen&daddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&hl=zh&output=embed" loading="lazy"></iframe>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Marienplatz%2C%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&travelmode=transit" target="_blank" rel="noopener">在 Google Maps / Apple Maps 中打开完整路线 →</a>
-      <div class="tips">酒店靠近 TUM / Forschungszentrum，为 19 日课程 / 拜访做准备。</div>
+      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Marienplatz%2C%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <div class="tips">酒店靠近 TUM（慕尼黑工业大学） / Forschungszentrum（研究中心），为 19 日课程 / 拜访做准备。</div>
     </div>
   </section>
 
@@ -698,9 +719,9 @@
   <section class="tickets">
     <h2>交通票建议</h2>
     <ul>
-      <li><b>10月17日：</b>机场 → 市区 + 市内交通，建议购买覆盖全 MVV 区间（含机场段）的日票（如 MVV Tageskarte 或 München XXL，看 2026 当日票价），不必买 Bayern-Ticket。</li>
-      <li><b>10月18日：</b>主要慕尼黑市区 + Garching，全程在 MVV 范围，用 MVV App 按行程买适用区域日票 / 单程票即可。</li>
-      <li><b>实时导航优先：</b>周年活动可能临时改线，<b>MVV App</b> 和 Google Maps 的实时导航比预设班次更可靠。</li>
+      <li><b>10月17日：</b>机场 → 市区 + 市内交通，建议购买覆盖全 MVV（慕尼黑交通联盟）区间（含机场段）的日票（如 MVV Tageskarte（慕尼黑交通联盟日票） 或 München XXL（慕尼黑XXL票），看 2026 当日票价），不必买 Bayern-Ticket（巴伐利亚州票）。</li>
+      <li><b>10月18日：</b>主要慕尼黑市区 + Garching（加兴），全程在 MVV（慕尼黑交通联盟）范围，用 MVV App（慕尼黑交通联盟App）按行程买适用区域日票 / 单程票即可。</li>
+      <li><b>实时导航优先：</b>周年活动可能临时改线，<b>MVV App（慕尼黑交通联盟App）</b> 和 Google Maps（谷歌地图）的实时导航比预设班次更可靠。</li>
       <li><b>双时区提示：</b>当地时间（MUC, UTC+2 夏令时）用于所有德国交通和店铺时间；与广州（UTC+8）相差 6 小时。</li>
     </ul>
   </section>
@@ -720,16 +741,16 @@
     </div>
     <p style="font-size:13px;margin-top:14px;color:#1f2a44;"><b>10月17-18日与你行程最相关的日照：</b></p>
     <ul style="font-size:13px;">
-      <li><b>10月17日：</b>日出约 07:35，日落约 18:21 (MUC，下同)。16:00 前往 Auer Dult，可经历白天到黄昏；18:30 离开时基本已经入夜。</li>
+      <li><b>10月17日：</b>日出约 07:35，日落约 18:21 (MUC（慕尼黑），下同)。16:00 前往 Auer Dult（秋季市集），可经历白天到黄昏；18:30 离开时基本已经入夜。</li>
       <li><b>10月18日：</b>日出约 07:37，日落约 18:19 (MUC)。上午车辆段开放日适合户外，下午自由活动建议把需要自然光的景点放在 17:30 以前。</li>
       <li>德国将在 <b>10月25日结束夏令时</b>，后半程会明显感觉傍晚更早天黑。</li>
     </ul>
     <p style="font-size:13px;margin-top:14px;color:#1f2a44;"><b>建议携带：</b>按 0-15°C 准备最稳妥：长袖打底 + 针织衫 / 薄抓绒 + 防风外套；再带一件轻薄羽绒作为低温备用。裤子以长裤为主，鞋子建议适合长时间步行、具有一定防水能力的运动鞋 / 休闲鞋。</p>
-    <p style="font-size:13px;color:#555;">另外建议带：小折叠伞或带帽防水外套、薄围巾。如果参加正式 MBA / TUM 活动，可准备一件偏商务的外套。</p>
+    <p style="font-size:13px;color:#555;">另外建议带：小折叠伞或带帽防水外套、薄围巾。如果参加正式 MBA（工商管理硕士） / TUM（慕尼黑工业大学）活动，可准备一件偏商务的外套。</p>
   </section>
 
   <footer>
-    本手册依据 2026-09-05 已公布的官方活动框架制作。周年庆细化节目仍可能更新，出发前请最终核对 MVG 公告与 MVV App 实时导航。
+    本手册依据 2026-09-05 已公布的官方活动框架制作。周年庆细化节目仍可能更新，出发前请最终核对 MVG（慕尼黑交通公司）公告与 MVV App（慕尼黑交通联盟App）实时导航。
   </footer>
 
 </div>
@@ -842,5 +863,21 @@
     if (e.key === 'Escape' && !modal.hidden) {
       closeModal();
     }
+  });
+
+  // 10月17日 / 10月18日 折叠
+  document.querySelectorAll('.day-header').forEach(function(header) {
+    function toggle() {
+      const section = header.parentElement;
+      const collapsed = section.classList.toggle('collapsed');
+      header.setAttribute('aria-expanded', String(!collapsed));
+    }
+    header.addEventListener('click', toggle);
+    header.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
+    });
   });
 </script>
