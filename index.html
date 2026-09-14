@@ -177,12 +177,59 @@
     overflow: hidden;
     border: 1px solid #e1e5ec;
   }
-  .map-block iframe {
+  .map-block { position: relative; }
+  .map-canvas {
     width: 100%;
     height: 220px;
     border: 0;
     display: block;
+    background: #e9edf2;
   }
+  .map-loading {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef1f5;
+    color: #7a869a;
+    font-size: 12px;
+    pointer-events: none;
+  }
+  .map-hint {
+    position: absolute;
+    left: 8px;
+    bottom: 6px;
+    z-index: 600;
+    background: rgba(255,255,255,.92);
+    color: #555;
+    font-size: 10px;
+    line-height: 1;
+    padding: 4px 8px;
+    border-radius: 10px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.18);
+    pointer-events: none;
+    transition: opacity .6s ease;
+  }
+  .map-hint.fade { opacity: 0; }
+  .map-pin {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #fff;
+    box-shadow: 0 1px 4px rgba(0,0,0,.35);
+  }
+  .pin-start { background: #1a9e5a; }
+  .pin-end { background: #d52b1e; }
+  .leaflet-container { font: inherit; font-size: 12px; }
+  .leaflet-control-attribution { font-size: 9px; background: rgba(255,255,255,.75); }
+  .leaflet-bar a { width: 30px; height: 30px; line-height: 30px; }
   .map-link {
     display: inline-block;
     margin-top: 6px;
@@ -276,7 +323,7 @@
     .event-title { display: inline; font-size: 17px; margin-top: 0; margin-left: 4px; }
     .event-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
     .event-meta > span { display: inline-block; margin-right: 16px; margin-bottom: 0; }
-    .map-block iframe { height: 320px; }
+    .map-canvas { height: 320px; }
     .route-detail { font-size: 14px; padding: 12px 16px; }
     .weather-section table { font-size: 13px; min-width: 0; }
     .weather-section, .tickets { padding: 20px 24px; margin-top: 24px; }
@@ -389,6 +436,18 @@
     box-shadow: inset 0 0 0 1px #e1e5ec;
     position: relative;
   }
+  .map-modal-icon.gaode {
+    background: #2f8cff;
+    color: #fff;
+    box-shadow: none;
+    font-size: 15px;
+  }
+  .map-modal-icon.baidu {
+    background: #306dff;
+    color: #fff;
+    box-shadow: none;
+    font-size: 15px;
+  }
   .map-modal-icon.apple::before {
     content: "";
     width: 18px;
@@ -474,9 +533,10 @@
         <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：S1 至 <b>Neufahrn（诺伊法恩）</b> 换乘 Bus 293（公交293路）直达 Garching（加兴）（适合行李少时，但班次稀疏，出发前查 MVV App（慕尼黑交通联盟App））。</p>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Flughafen%20M%C3%BCnchen&daddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012%2C%2085748%20Garching&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="airport-hotel"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Flughafen%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012%2C%2085748%20Garching&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="airport-hotel">在 App 中打开完整路线 →</a>
       <div class="tips">先在酒店寄存行李（10:30 前抵达，通常可寄存或申请 early check-in（提前办理入住））。当天不要带大行李去老城。</div>
     </div>
 
@@ -502,9 +562,10 @@
         </ol>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&daddr=Marienplatz%2C%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="hotel-marien"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&destination=Marienplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="hotel-marien">在 App 中打开完整路线 →</a>
     </div>
 
     <div class="event">
@@ -543,9 +604,10 @@
         <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：<span class="line-tag line-bus">Bus 52（52路公交）</span> 也可直达 Mariahilfplatz（圣母助佑广场）；如庆典影响线路，以 MVV（慕尼黑交通联盟）实时导航为准。</p>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Marienplatz%2C%20M%C3%BCnchen&daddr=Mariahilfplatz%2C%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="marien-mariahilf"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Marienplatz%2C%20M%C3%BCnchen&destination=Mariahilfplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="marien-mariahilf">在 App 中打开完整路线 →</a>
     </div>
 
     <div class="event">
@@ -586,9 +648,10 @@
         <p style="margin:8px 0 0;font-size:12px;color:#666;">提示：第一天夜航抵达，建议 21:00-21:30 (MUC) / 03:00-03:30 (GZ) 收工回酒店。U6 末班车通常 1:00 左右，但建议早点回。</p>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Mariahilfplatz%2C%20M%C3%BCnchen&daddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="mariahilf-hotel"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Mariahilfplatz%2C%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="mariahilf-hotel">在 App 中打开完整路线 →</a>
     </div>
   </section>
 
@@ -624,9 +687,10 @@
         <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：Max-Weber-Platz（马克斯·韦伯广场）出站后乘 <span class="line-tag line-tram">Tram 19（19路电车）</span>（方向 Berg am Laim Bf.（莱姆山火车站））2 站至 Einsteinstraße（爱因斯坦街），再步行。</p>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&daddr=Einsteinstra%C3%9Fe%20148%2C%2081677%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="hotel-betrieb"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&destination=Einsteinstra%C3%9Fe%20148%2C%2081677%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="hotel-betrieb">在 App 中打开完整路线 →</a>
       <div class="tips">开放日专门交通安排尚可能更新，出发前查 MVG（慕尼黑交通公司）官方公告；入口位置以现场指示为准。</div>
     </div>
 
@@ -668,9 +732,10 @@
         <p style="margin:8px 0 0;font-size:12px;color:#666;">备选：在 Einsteinstraße（爱因斯坦街）直接乘 <span class="line-tag line-tram">Tram 19（19路电车）</span>（向西方向）至 <b>Theatinerstraße（提亚蒂纳街） / Odeonsplatz（统帅堂广场）</b> 一带。</p>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Einsteinstra%C3%9Fe%20148%2C%20M%C3%BCnchen&daddr=Odeonsplatz%2C%20M%C3%BCnchen&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="betrieb-odeon"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Einsteinstra%C3%9Fe%20148%2C%20M%C3%BCnchen&destination=Odeonsplatz%2C%20M%C3%BCnchen&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="betrieb-odeon">在 App 中打开完整路线 →</a>
     </div>
 
     <div class="event">
@@ -708,9 +773,10 @@
         </ol>
       </div>
       <div class="map-block">
-        <iframe src="https://maps.google.com/maps?saddr=Marienplatz%2C%20M%C3%BCnchen&daddr=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&hl=zh&output=embed" loading="lazy"></iframe>
+        <div class="map-canvas" data-route="marien-hotel"></div>
+        <div class="map-loading">地图加载中…</div>
       </div>
-      <a class="map-link" href="https://www.google.com/maps/dir/?api=1&origin=Marienplatz%2C%20M%C3%BCnchen&destination=Courtyard%20by%20Marriott%20Munich%20Garching%2C%20Walther-von-Dyck-Strasse%2012&travelmode=transit" target="_blank" rel="noopener">在 Google Maps（谷歌地图） / Apple Maps（苹果地图）中打开完整路线 →</a>
+      <a class="map-link" href="#" data-route="marien-hotel">在 App 中打开完整路线 →</a>
       <div class="tips">酒店靠近 TUM（慕尼黑工业大学） / Forschungszentrum（研究中心），为 19 日课程 / 拜访做准备。</div>
     </div>
   </section>
@@ -761,14 +827,7 @@
   <div class="map-modal-panel">
     <h3 id="map-modal-title">选择地图应用</h3>
     <p class="map-modal-sub">选择打开方式</p>
-    <button type="button" class="map-modal-btn" data-choice="google">
-      <span class="map-modal-icon">G</span>
-      <span><b>Google Maps</b><small>在浏览器或 Google Maps App 中打开</small></span>
-    </button>
-    <button type="button" class="map-modal-btn" data-choice="apple">
-      <span class="map-modal-icon apple"></span>
-      <span><b>Apple Maps</b><small>在地图 App 或浏览器中打开</small></span>
-    </button>
+    <div id="map-modal-choices"></div>
     <button type="button" class="map-modal-close" data-close>取消</button>
   </div>
 </div>
@@ -797,73 +856,381 @@
   updateClocks();
   setInterval(updateClocks, 1000);
 
-  // 地图选择弹窗
-  // Google Maps URL → Apple Maps URL 转换
-  function googleToAppleMapsUrl(googleUrl) {
-    try {
-      const u = new URL(googleUrl);
-      const origin = u.searchParams.get('origin') || '';
-      const destination = u.searchParams.get('destination') || '';
-      const appleUrl = new URL('https://maps.apple.com/');
-      if (origin) appleUrl.searchParams.set('saddr', origin);
-      if (destination) appleUrl.searchParams.set('daddr', destination);
-      // 公共交通模式
-      appleUrl.searchParams.set('dirflg', 'r');
-      return appleUrl.toString();
-    } catch (e) {
-      return googleUrl;
-    }
+  // ============================================================
+  // 地图：IP 地区检测 + Leaflet 内嵌地图（国内 ESRI/Bing，国外 CARTO/OSM）
+  // 全部地点坐标均为 WGS-84
+  // ============================================================
+  const POIS = {
+    airport:   { lat: 48.353769, lng: 11.786126, name: '慕尼黑机场（MUC）' },
+    hotel:     { lat: 48.264976, lng: 11.672134, name: '加兴万怡酒店（Courtyard Garching）' },
+    marien:    { lat: 48.137144, lng: 11.575399, name: '玛利亚广场（Marienplatz）' },
+    mariahilf: { lat: 48.125600, lng: 11.582400, name: '圣母助佑广场（Mariahilfplatz）' },
+    betrieb:   { lat: 48.136551, lng: 11.616654, name: '电车车辆段 Einsteinstraße 148' },
+    odeon:     { lat: 48.142766, lng: 11.576317, name: '统帅堂广场（Odeonsplatz）' }
+  };
+  const ROUTES = {
+    'airport-hotel':    ['airport', 'hotel'],
+    'hotel-marien':     ['hotel', 'marien'],
+    'marien-mariahilf': ['marien', 'mariahilf'],
+    'mariahilf-hotel':  ['mariahilf', 'hotel'],
+    'hotel-betrieb':    ['hotel', 'betrieb'],
+    'betrieb-odeon':    ['betrieb', 'odeon'],
+    'marien-hotel':     ['marien', 'hotel']
+  };
+
+  // ---------- IP 地区检测（多源 fallback，结果缓存 6 小时） ----------
+  function fetchJson(url) {
+    return fetch(url, { cache: 'no-store' }).then(function(r) {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    });
+  }
+  function detectRegion() {
+    return new Promise(function(resolve) {
+      const CN = 'CN';
+      try {
+        const cached = JSON.parse(localStorage.getItem('muc-map-region') || 'null');
+        if (cached && cached.code && Date.now() - cached.ts < 6 * 3600 * 1000) {
+          resolve(cached.code);
+          return;
+        }
+      } catch (e) {}
+      const services = [
+        function() { return fetchJson('https://ipapi.co/json/').then(function(j) { return j && j.country_code; }); },
+        function() { return fetchJson('https://ipwho.is/').then(function(j) { return j && j.country_code; }); },
+        function() { return fetchJson('https://api.country.is/').then(function(j) { return j && j.country; }); },
+        function() { return fetchJson('https://get.geojs.io/v1/ip/country.json').then(function(j) { return j && j.country; }); }
+      ];
+      function finish(code) {
+        try { localStorage.setItem('muc-map-region', JSON.stringify({ code: code, ts: Date.now() })); } catch (e) {}
+        resolve(code);
+      }
+      function guess() {
+        const tz = (Intl.DateTimeFormat().resolvedOptions().timeZone) || '';
+        const lang = navigator.language || '';
+        finish(tz === 'Asia/Shanghai' && /^zh/i.test(lang) ? CN : 'GL');
+      }
+      function next(i) {
+        if (i >= services.length) { guess(); return; }
+        Promise.race([
+          services[i](),
+          new Promise(function(_, reject) { setTimeout(reject, 6000); })
+        ]).then(function(code) {
+          if (code) finish(String(code).toUpperCase() === CN ? CN : 'GL');
+          else next(i + 1);
+        }).catch(function() { next(i + 1); });
+      }
+      next(0);
+    });
   }
 
-  const modal = document.getElementById('map-modal');
-  let pendingUrl = null; // 当前要打开的 Google Maps URL
+  // ---------- Leaflet 动态加载（多 CDN fallback） ----------
+  const CDN = {
+    CN: {
+      css: [
+        'https://cdn.staticfile.net/leaflet/1.9.4/leaflet.css',
+        'https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.css',
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css',
+        'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css'
+      ],
+      js: [
+        'https://cdn.staticfile.net/leaflet/1.9.4/leaflet.js',
+        'https://cdn.bootcdn.net/ajax/libs/leaflet/1.9.4/leaflet.min.js',
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js',
+        'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js'
+      ]
+    },
+    GL: {
+      css: [
+        'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css',
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css',
+        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.css',
+        'https://cdn.staticfile.net/leaflet/1.9.4/leaflet.css'
+      ],
+      js: [
+        'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js',
+        'https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js',
+        'https://unpkg.com/leaflet@1.9.4/dist/leaflet.js',
+        'https://cdn.staticfile.net/leaflet/1.9.4/leaflet.js'
+      ]
+    }
+  };
+  function injectCss(urls, i) {
+    if (i >= urls.length) return;
+    const link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = urls[i];
+    link.addEventListener('error', function() { injectCss(urls, i + 1); });
+    document.head.appendChild(link);
+  }
+  function loadJsChain(urls, i) {
+    return new Promise(function(resolve, reject) {
+      if (window.L) { resolve(); return; }
+      if (i >= urls.length) { reject(new Error('Leaflet CDN 全部失败')); return; }
+      const s = document.createElement('script');
+      let settled = false;
+      const timer = setTimeout(function() {
+        if (settled) return;
+        settled = true;
+        s.remove();
+        loadJsChain(urls, i + 1).then(resolve, reject);
+      }, 15000);
+      s.onload = function() {
+        clearTimeout(timer);
+        if (window.L) resolve();
+        else if (!settled) { settled = true; loadJsChain(urls, i + 1).then(resolve, reject); }
+      };
+      s.onerror = function() {
+        clearTimeout(timer);
+        if (!settled) { settled = true; loadJsChain(urls, i + 1).then(resolve, reject); }
+      };
+      s.src = urls[i];
+      document.head.appendChild(s);
+    });
+  }
+  let leafletPromise = null;
+  function loadLeaflet(region) {
+    if (!leafletPromise) {
+      const list = CDN[region] || CDN.GL;
+      injectCss(list.css, 0);
+      leafletPromise = loadJsChain(list.js, 0);
+    }
+    return leafletPromise;
+  }
 
-  function openModal(googleUrl) {
-    pendingUrl = googleUrl;
+  // ---------- 内嵌地图 ----------
+  function tileQuadKey(x, y, z) {
+    let qk = '';
+    for (let i = z; i > 0; i--) {
+      let d = 0;
+      const m = 1 << (i - 1);
+      if (x & m) d++;
+      if (y & m) d += 2;
+      qk += d;
+    }
+    return qk;
+  }
+  function initMap(el, region) {
+    if (el._mapInit) return;
+    const pair = ROUTES[el.getAttribute('data-route')];
+    if (!pair) return;
+    el._mapInit = true;
+    const L = window.L;
+    const o = POIS[pair[0]], d = POIS[pair[1]];
+
+    const loading = el.parentNode.querySelector('.map-loading');
+    if (loading) loading.remove();
+
+    // Bing 道路图（quadkey），作为国内第二备选
+    const BingLayer = L.TileLayer.extend({
+      getTileUrl: function(coords) {
+        const subs = this.options.subdomains;
+        const s = subs[Math.abs(coords.x + coords.y) % subs.length];
+        return 'https://t' + s + '.ssl.ak.tiles.virtualearth.net/tiles/r'
+          + tileQuadKey(coords.x, coords.y, coords.z) + '.jpeg?g=1&mkt=zh-CN';
+      }
+    });
+    const esri = function() {
+      return L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+        maxZoom: 23, attribution: '© Esri · HERE · OpenStreetMap'
+      });
+    };
+    const bing = function() {
+      return new BingLayer('', {
+        subdomains: ['0', '1', '2', '3'], maxZoom: 19,
+        attribution: '© Microsoft · OpenStreetMap'
+      });
+    };
+    const osm = function() {
+      return L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19, attribution: '© OpenStreetMap contributors'
+      });
+    };
+    // ESRI 街道图免 key 且国内外均可访问；Bing、OSM 依次兜底（CARTO 已改为需要 API key，不再使用）
+    const factories = [esri, bing, osm];
+
+    // Leaflet 默认即支持单指拖动、双指捏合缩放
+    const map = L.map(el, { zoomControl: false, tap: true });
+    el._leafletMap = map;
+    L.control.zoom({ position: 'topright' }).addTo(map);
+
+    function addBaseLayer(idx) {
+      const layer = factories[idx]();
+      let errors = 0, loaded = 0, swapped = false, swapTimer = null;
+      function trySwap() {
+        if (swapped || loaded > 0 || !map.hasLayer(layer)) return;
+        if (idx < factories.length - 1) {
+          swapped = true;
+          map.removeLayer(layer);
+          addBaseLayer(idx + 1);
+        }
+      }
+      layer.on('tileload', function() {
+        loaded++;
+        if (swapTimer) clearTimeout(swapTimer);
+      });
+      layer.on('tileerror', function() {
+        errors++;
+        // 只要成功过一片就不换源；初始连续失败时宽限 1.2 秒再切换，避免握手抖动误杀
+        if (swapped || loaded > 0) return;
+        if (errors >= 4) {
+          if (swapTimer) clearTimeout(swapTimer);
+          swapTimer = setTimeout(trySwap, 1200);
+        }
+      });
+      layer.addTo(map);
+    }
+    addBaseLayer(0);
+
+    const startIcon = L.divIcon({ className: 'map-pin pin-start', html: '起', iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -10] });
+    const endIcon = L.divIcon({ className: 'map-pin pin-end', html: '终', iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -10] });
+    L.marker([o.lat, o.lng], { icon: startIcon }).addTo(map).bindPopup('<b>起点</b> ' + o.name);
+    L.marker([d.lat, d.lng], { icon: endIcon }).addTo(map).bindPopup('<b>终点</b> ' + d.name);
+    L.polyline([[o.lat, o.lng], [d.lat, d.lng]], {
+      color: '#1e5bb8', weight: 3, dashArray: '6,6', opacity: .85
+    }).addTo(map).bindPopup('直线示意，实际路线请以公共交通导航为准');
+
+    const bounds = L.latLngBounds([[o.lat, o.lng], [d.lat, d.lng]]).pad(0.3);
+    map.fitBounds(bounds, { maxZoom: 14 });
+    setTimeout(function() { map.invalidateSize(); map.fitBounds(bounds, { maxZoom: 14 }); }, 300);
+
+    const hint = document.createElement('div');
+    hint.className = 'map-hint';
+    hint.textContent = '单指拖动 · 双指缩放';
+    el.parentNode.appendChild(hint);
+    setTimeout(function() { hint.classList.add('fade'); }, 4000);
+    setTimeout(function() { hint.remove(); }, 5200);
+  }
+  function setupMaps(region) {
+    const canvases = document.querySelectorAll('.map-canvas');
+    if (!('IntersectionObserver' in window)) {
+      canvases.forEach(function(c) { initMap(c, region); });
+      return;
+    }
+    const io = new IntersectionObserver(function(entries) {
+      entries.forEach(function(en) {
+        if (en.isIntersecting) {
+          initMap(en.target, region);
+          io.unobserve(en.target);
+        }
+      });
+    }, { rootMargin: '300px 0px' });
+    canvases.forEach(function(c) { io.observe(c); });
+  }
+  function markMapsFailed() {
+    document.querySelectorAll('.map-loading').forEach(function(n) {
+      n.textContent = '地图加载失败，请点下方链接在地图 App 中查看路线';
+    });
+  }
+
+  // ---------- 地图选择弹窗（Google / Apple / 高德 / 百度） ----------
+  const modal = document.getElementById('map-modal');
+  const choicesBox = document.getElementById('map-modal-choices');
+  let pendingRoute = null;
+  let currentRegion = 'GL';
+
+  const PROVIDERS = {
+    google: { icon: 'G',    cls: '',       name: 'Google Maps', desc: '谷歌地图 · 浏览器或 App' },
+    apple:  { icon: '',     cls: 'apple',  name: 'Apple Maps',  desc: '苹果地图 · 地图 App 或浏览器' },
+    amap:   { icon: '高',   cls: 'gaode',  name: '高德地图',     desc: '中文界面 · App / 网页版' },
+    baidu:  { icon: '百',   cls: 'baidu',  name: '百度地图',     desc: '中文界面 · App / 网页版' }
+  };
+  function renderChoices(region) {
+    const order = region === 'CN' ? ['amap', 'baidu', 'apple', 'google'] : ['google', 'apple', 'amap', 'baidu'];
+    choicesBox.innerHTML = order.map(function(id) {
+      const p = PROVIDERS[id];
+      return '<button type="button" class="map-modal-btn" data-choice="' + id + '">'
+        + '<span class="map-modal-icon ' + p.cls + '">' + p.icon + '</span>'
+        + '<span><b>' + p.name + '</b><small>' + p.desc + '</small></span>'
+        + '</button>';
+    }).join('');
+  }
+  function openModal(routeId) {
+    pendingRoute = routeId;
+    renderChoices(currentRegion);
     modal.hidden = false;
     document.body.style.overflow = 'hidden';
   }
-
   function closeModal() {
     modal.hidden = true;
-    pendingUrl = null;
+    pendingRoute = null;
     document.body.style.overflow = '';
   }
-
+  // 全部用 WGS-84 坐标生成，避免地名歧义（尤其海外同名地点）
+  function routeUrls(routeId) {
+    const pair = ROUTES[routeId];
+    const o = POIS[pair[0]], d = POIS[pair[1]];
+    const enc = encodeURIComponent;
+    return {
+      google: 'https://www.google.com/maps/dir/?api=1&origin=' + o.lat + ',' + o.lng
+        + '&destination=' + d.lat + ',' + d.lng + '&travelmode=transit',
+      apple: 'https://maps.apple.com/?saddr=' + o.lat + ',' + o.lng
+        + '&daddr=' + d.lat + ',' + d.lng + '&dirflg=r',
+      amap: 'https://uri.amap.com/navigation?from=' + o.lng + ',' + o.lat + ',' + enc(o.name)
+        + '&to=' + d.lng + ',' + d.lat + ',' + enc(d.name)
+        + '&mode=bus&coordinate=wgs84&callnative=1&src=mucTripBook',
+      baiduWeb: 'https://api.map.baidu.com/direction?origin=latlng:' + o.lat + ',' + o.lng + '|name:' + enc(o.name)
+        + '&destination=latlng:' + d.lat + ',' + d.lng + '|name:' + enc(d.name)
+        + '&mode=transit&coord_type=wgs84&output=html'
+        + '&origin_region=' + enc('慕尼黑') + '&destination_region=' + enc('慕尼黑')
+        + '&src=webapp.mucTripBook',
+      baiduApp: 'baidumap://map/direction?origin=' + o.lat + ',' + o.lng
+        + '&destination=' + d.lat + ',' + d.lng
+        + '&mode=transit&coord_type=wgs84&src=webapp.mucTripBook'
+    };
+  }
+  function openBaidu(appUrl, webUrl) {
+    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) { window.open(webUrl, '_blank', 'noopener'); return; }
+    // 手机端：先尝试调起百度地图 App，1.5 秒内未离开页面则回退网页版
+    const timer = setTimeout(function() {
+      if (!document.hidden) window.location.href = webUrl;
+    }, 1500);
+    window.addEventListener('pagehide', function onHide() {
+      clearTimeout(timer);
+      window.removeEventListener('pagehide', onHide);
+    });
+    window.location.href = appUrl;
+  }
   function openMap(choice) {
-    if (!pendingUrl) return;
-    let url = pendingUrl;
-    if (choice === 'apple') {
-      url = googleToAppleMapsUrl(pendingUrl);
-    }
-    window.open(url, '_blank', 'noopener');
+    if (!pendingRoute) return;
+    const urls = routeUrls(pendingRoute);
     closeModal();
+    if (choice === 'baidu') { openBaidu(urls.baiduApp, urls.baiduWeb); return; }
+    window.open(urls[choice], '_blank', 'noopener');
   }
 
-  // 绑定所有 .map-link
   document.querySelectorAll('a.map-link').forEach(function(link) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
-      openModal(link.href);
+      openModal(link.getAttribute('data-route'));
     });
   });
 
-  // 弹窗事件代理
   modal.addEventListener('click', function(e) {
     if (e.target.matches('[data-close]')) {
       closeModal();
-    } else if (e.target.closest('[data-choice]')) {
+    } else {
       const btn = e.target.closest('[data-choice]');
-      openMap(btn.getAttribute('data-choice'));
+      if (btn) openMap(btn.getAttribute('data-choice'));
     }
   });
 
-  // ESC 关闭
   document.addEventListener('keydown', function(e) {
-    if (e.key === 'Escape' && !modal.hidden) {
-      closeModal();
-    }
+    if (e.key === 'Escape' && !modal.hidden) closeModal();
   });
+
+  // ---------- 启动：先渲染弹窗（默认顺序），再检测地区、加载地图 ----------
+  renderChoices('GL');
+  detectRegion().then(function(region) {
+    currentRegion = region;
+    return loadLeaflet(region).then(function() {
+      setupMaps(region);
+    });
+  }).catch(function() {
+    markMapsFailed();
+  });
+
 
   // 10月17日 / 10月18日 折叠
   document.querySelectorAll('.day-header').forEach(function(header) {
@@ -871,6 +1238,13 @@
       const section = header.parentElement;
       const collapsed = section.classList.toggle('collapsed');
       header.setAttribute('aria-expanded', String(!collapsed));
+      if (!collapsed) {
+        setTimeout(function() {
+          section.querySelectorAll('.map-canvas').forEach(function(c) {
+            if (c._leafletMap) c._leafletMap.invalidateSize();
+          });
+        }, 60);
+      }
     }
     header.addEventListener('click', toggle);
     header.addEventListener('keydown', function(e) {
