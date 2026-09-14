@@ -100,7 +100,47 @@
   .event:last-child { border-bottom: none; }
   .event-head {
     margin-bottom: 8px;
+    position: relative;
+    cursor: pointer;
+    padding-right: 28px;
   }
+  .event-no {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 22px;
+    height: 22px;
+    padding: 0 6px;
+    margin-right: 6px;
+    border-radius: 11px;
+    background: #e8eefb;
+    color: #0b3d91;
+    font-size: 12px;
+    font-weight: 700;
+    vertical-align: middle;
+    flex-shrink: 0;
+  }
+  .event-toggle {
+    position: absolute;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    background: #eef2f8;
+    color: #55607a;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    pointer-events: none;
+    transition: transform .25s ease;
+  }
+  .event-toggle::before { content: "▾"; }
+  .event.collapsed .event-toggle { transform: translateY(-50%) rotate(-90deg); }
+  .event.collapsed > *:not(.event-head) { display: none; }
+  .event.collapsed .event-head { margin-bottom: 0; }
   .event-time {
     display: inline-flex;
     flex-direction: column;
@@ -269,6 +309,22 @@
   .weather-section th { background: #f0f4f8; color: #0b3d91; }
   .tickets ul { margin: 8px 0; padding-left: 20px; }
   .tickets li { margin-bottom: 7px; font-size: 13px; line-height: 1.55; }
+  /* 公共交通标识说明 */
+  .transport-legend .legend-note { font-size: 12px; color: #555; margin: 6px 0 10px; }
+  .legend-list { display: flex; flex-direction: column; gap: 8px; }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: #f7f9fc;
+    border: 1px solid #e5eaf2;
+    border-radius: 8px;
+    padding: 8px 10px;
+  }
+  .legend-chip { font-size: 12px; padding: 3px 9px; flex-shrink: 0; }
+  .legend-txt { flex: 1; min-width: 0; }
+  .legend-txt b { display: block; font-size: 13px; color: #1f2a44; }
+  .legend-txt small { display: block; font-size: 11px; color: #66708a; margin-top: 2px; line-height: 1.5; }
   footer {
     text-align: center;
     color: #888;
@@ -321,7 +377,9 @@
       padding-left: 10px;
     }
     .event-title { display: inline; font-size: 17px; margin-top: 0; margin-left: 4px; }
-    .event-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .event-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; padding-right: 32px; }
+    .event-no { min-width: 24px; height: 24px; font-size: 13px; margin-right: 0; }
+    .event-toggle { width: 26px; height: 26px; font-size: 13px; }
     .event-meta > span { display: inline-block; margin-right: 16px; margin-bottom: 0; }
     .map-canvas { height: 320px; }
     .route-detail { font-size: 14px; padding: 12px 16px; }
@@ -500,7 +558,7 @@
           <span class="t-muc">08:05 MUC</span>
           <span class="t-gz">14:05 GZ</span>
         </span>
-        <span class="event-title">CX301 抵达慕尼黑机场</span>
+        <span class="event-title">CX301 HKG T1 → MUC T1，抵达慕尼黑机场</span>
       </div>
       <div class="event-meta">
         <span>地点：<b>慕尼黑机场 (MUC)</b></span>
@@ -813,6 +871,35 @@
     </ul>
     <p style="font-size:13px;margin-top:14px;color:#1f2a44;"><b>建议携带：</b>按 0-15°C 准备最稳妥：长袖打底 + 针织衫 / 薄抓绒 + 防风外套；再带一件轻薄羽绒作为低温备用。裤子以长裤为主，鞋子建议适合长时间步行、具有一定防水能力的运动鞋 / 休闲鞋。</p>
     <p style="font-size:13px;color:#555;">另外建议带：小折叠伞或带帽防水外套、薄围巾。如果参加正式 MBA（工商管理硕士） / TUM（慕尼黑工业大学）活动，可准备一件偏商务的外套。</p>
+  </section>
+
+  <!-- 公共交通标识说明 -->
+  <section class="tickets transport-legend">
+    <h2>公共交通标识说明</h2>
+    <p class="legend-note">近两天行程中用到的公共交通方式与页面内标识颜色的对照如下，看到同色标识即为同类交通方式。</p>
+    <div class="legend-list">
+      <div class="legend-item">
+        <span class="line-tag line-s legend-chip">S1</span>
+        <div class="legend-txt"><b>火车 · S-Bahn（城郊快铁）</b><small>标识色：蓝色 ｜ 乘坐：S1（机场 ↔ 中央火车站）</small></div>
+      </div>
+      <div class="legend-item">
+        <span class="line-tag line-u6 legend-chip">U6</span>
+        <span class="line-tag line-u4 legend-chip">U4/U5</span>
+        <div class="legend-txt"><b>地铁 · U-Bahn</b><small>标识色：U6 红色、U4/U5 绿色 ｜ 乘坐：U6（加兴 ↔ 市区）、U4/U5（Odeonsplatz ↔ Max-Weber-Platz）</small></div>
+      </div>
+      <div class="legend-item">
+        <span class="line-tag line-tram legend-chip">Tram</span>
+        <div class="legend-txt"><b>电车 · Tram</b><small>标识色：红色 ｜ 乘坐：18 路（Auer Dult 市集）、19 路（车辆段一带）</small></div>
+      </div>
+      <div class="legend-item">
+        <span class="line-tag line-bus legend-chip">Bus</span>
+        <div class="legend-txt"><b>公交 · Bus</b><small>标识色：绿色 ｜ 备选：52 路（Auer Dult）、293 路（机场 → 加兴）</small></div>
+      </div>
+      <div class="legend-item">
+        <span class="line-tag line-walk legend-chip">步行</span>
+        <div class="legend-txt"><b>步行 · Fußweg</b><small>标识色：灰色 ｜ 车站与目的地之间的短途接驳</small></div>
+      </div>
+    </div>
   </section>
 
   <footer>
@@ -1251,6 +1338,44 @@
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
         toggle();
+      }
+    });
+  });
+
+  // ---------- 时间段顺序编号 + 折叠/展开 ----------
+  document.querySelectorAll('.event').forEach(function(ev, idx) {
+    const head = ev.querySelector('.event-head');
+    if (!head) return;
+    // 按时间顺序编号（跨天连续：第1天 1-7，第2天 8-12）
+    const no = document.createElement('span');
+    no.className = 'event-no';
+    no.textContent = String(idx + 1);
+    head.insertBefore(no, head.firstChild);
+    // 折叠箭头按钮
+    const tg = document.createElement('span');
+    tg.className = 'event-toggle';
+    tg.setAttribute('aria-hidden', 'true');
+    head.appendChild(tg);
+    head.setAttribute('role', 'button');
+    head.setAttribute('tabindex', '0');
+    head.setAttribute('aria-expanded', 'true');
+    function toggleEvent() {
+      const collapsed = ev.classList.toggle('collapsed');
+      head.setAttribute('aria-expanded', String(!collapsed));
+      if (!collapsed) {
+        // 展开后刷新事件内地图尺寸
+        setTimeout(function() {
+          ev.querySelectorAll('.map-canvas').forEach(function(c) {
+            if (c._leafletMap) c._leafletMap.invalidateSize();
+          });
+        }, 60);
+      }
+    }
+    head.addEventListener('click', toggleEvent);
+    head.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggleEvent();
       }
     });
   });
